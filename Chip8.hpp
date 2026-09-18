@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include "random"
 
 const unsigned int VIDEO_WIDTH = 64;
 const unsigned int VIDEO_HEIGHT = 32;
@@ -8,6 +9,12 @@ class Chip8{
 public:
 	Chip8();
 	void LoadROM(char const* filename);
+	void Table0();
+	void Table8();
+	void TableE();
+	void TableF();
+
+	void OP_NULL();
 	void OP_1nnn();
 	void OP_2nnn();
 	void OP_3xkk();
@@ -57,4 +64,12 @@ public:
 	uint8_t keypad[16]{};
 	uint32_t video[64 * 32]{};
 	uint16_t opcode;
+    typedef void (Chip8::*Chip8Func)();
+	Chip8Func table[0xF + 1];
+	Chip8Func table0[0xE + 1];
+	Chip8Func table8[0xE + 1];
+	Chip8Func tableE[0xE + 1];
+	Chip8Func tableF[0x65 + 1];
+	std::default_random_engine randGen;
+	std::uniform_int_distribution<uint8_t> randByte;
 };
