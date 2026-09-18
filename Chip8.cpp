@@ -212,10 +212,10 @@ void Chip8::OP_8xy5(){
 
     int8_t difference = registers[Vx]-registers[Vy];
     if(difference<0){
-        registers[0xF]=1;
+        registers[0xF]=0;
     }
     else{
-        registers[0xF]=0;
+        registers[0xF]=1;
     }
     registers[Vx]-=registers[Vy];
 }
@@ -228,7 +228,7 @@ void Chip8::OP_8xy7(){
 	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 	uint8_t Vy = (opcode & 0x00F0u) >> 4u;
 
-	if (registers[Vy] > registers[Vx]){
+	if (registers[Vy] >= registers[Vx]){
 		registers[0xF] = 1;
 	}
 	else{
@@ -266,7 +266,7 @@ void Chip8::OP_Cxkk()
 }
 void Chip8::OP_Dxyn(){
     uint8_t Vx =  (opcode & 0x0F00) >> 8u;
-    uint8_t Vy =  (opcode & 0x00F0) >> 8u;
+    uint8_t Vy =  (opcode & 0x00F0) >> 4u;
     uint8_t height = opcode & 0x000F;
 
     uint8_t xpos = registers[Vx]%VIDEO_WIDTH;
@@ -277,7 +277,7 @@ void Chip8::OP_Dxyn(){
     for(uint8_t row=0;row<height;row++){
         uint8_t spriteByte = memory[index+row];
         for(int col=0;col<8;col++){
-            uint8_t spritePixel = spriteByte & (0x0800 >> col);
+            uint8_t spritePixel = spriteByte & (0x80 >> col);
             uint32_t* screenPixel = &video[(ypos+row)*VIDEO_WIDTH+(xpos+col)];
 
             if(spritePixel){
