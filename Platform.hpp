@@ -10,9 +10,12 @@ public:
 
 	void Update(void const* buffer, int pitch);
 	bool ProcessInput(uint8_t* keys);
+	void ProcessAudio(uint8_t timer);
 
 private:
 	SDL_Window* window{};
 	SDL_Renderer* renderer{};
 	SDL_Texture* texture{};
+	SDL_AudioStream* audioStream;
+    int audioPhase = 0;
 };

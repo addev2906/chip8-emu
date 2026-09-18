@@ -1,9 +1,24 @@
 #include <chrono>
+#include <fstream>
+#include <iomanip>
 #include <iostream>
 
 #include "Chip8.hpp"
 #include "Platform.hpp"
 
+void saveProgram(Chip8& chip8, int start, int count){
+    std::ofstream output("program.txt");
+    if(output.is_open()){
+        for (int i = start; i < start + count; ++i)
+                {
+                    // Replaces printf("%03X: %02X\n", i, chip8.memory[i]);
+                    output << std::uppercase << std::hex
+                           << std::setfill('0') << std::setw(3) << i << ": "
+                           << std::setfill('0') << std::setw(2) << static_cast<int>(chip8.memory[i]) << "\n";
+                }
+                output.close(); // Good practice to close the file explicitly
+    }
+}
 int main(int argc, char** argv)
 {
 	if (argc != 4)
@@ -20,16 +35,16 @@ int main(int argc, char** argv)
 
 	Chip8 chip8;
 	chip8.LoadROM(romFilename);
+	saveProgram(chip8, 0x200,3583);
 
 	int videoPitch = sizeof(chip8.video[0]) * VIDEO_WIDTH;
 
 	auto lastCycleTime = std::chrono::high_resolution_clock::now();
 	bool quit = false;
-
 	while (!quit)
 	{
 		quit = platform.ProcessInput(chip8.keypad);
-
+		platform.ProcessAudio(chip8.soundTimer);
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		float dt = std::chrono::duration<float, std::chrono::milliseconds::period>(currentTime - lastCycleTime).count();
 

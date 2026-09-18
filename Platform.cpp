@@ -1,8 +1,11 @@
 #include "Platform.hpp"
+#include <SDL3/SDL_init.h>
+#include <SDL3/SDL_audio.h>
+#include <cstdint>
 
 Platform::Platform(char const* title, int windowWidth, int windowHeight, int textureWidth, int textureHeight)
 {
-	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 
 	window = SDL_CreateWindow(title, windowWidth, windowHeight, 0);
 	renderer = SDL_CreateRenderer(window, NULL);
@@ -11,10 +14,22 @@ Platform::Platform(char const* title, int windowWidth, int windowHeight, int tex
 	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
                               SDL_TEXTUREACCESS_STREAMING, textureWidth, textureHeight);
 	SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+	SDL_AudioSpec spec;
+    spec.freq = 44100;
+    spec.channels = 1;
+    spec.format = SDL_AUDIO_F32;
+
+    audioStream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, nullptr, nullptr);
+
+    // Start the stream once and leave it running indefinitely
+    SDL_ResumeAudioStreamDevice(audioStream);
 }
 
 Platform::~Platform()
 {
+    if (audioStream) {
+        SDL_DestroyAudioStream(audioStream);
+    }
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
@@ -28,7 +43,28 @@ void Platform::Update(void const* buffer, int pitch)
 	SDL_RenderTexture(renderer, texture, nullptr, nullptr);
 	SDL_RenderPresent(renderer);
 }
+void Platform::ProcessAudio(uint8_t soundTimer) {
+    while (SDL_GetAudioStreamAvailable(audioStream) < 8192) {
+            float sampleBuffer[512];
+            const float amplitude = 0.1f;
+            const int halfPeriod = 44100 / 440 / 2; // 50 samples per half-wave at 440Hz
 
+            for (int i = 0; i < 512; ++i) {
+                if (soundTimer > 0) {
+                    // Generate square wave
+                    sampleBuffer[i] = ((audioPhase / halfPeriod) % 2 == 0) ? amplitude : -amplitude;
+                } else {
+                    // Generate silence
+                    sampleBuffer[i] = 0.0f;
+                }
+
+                // Advance phase and wrap cleanly at 44100 to prevent integer overflow
+                audioPhase = (audioPhase + 1) % 44100;
+            }
+
+            SDL_PutAudioStreamData(audioStream, sampleBuffer, sizeof(sampleBuffer));
+        }
+}
 bool Platform::ProcessInput(uint8_t* keys)
 {
 	bool quit = false;
