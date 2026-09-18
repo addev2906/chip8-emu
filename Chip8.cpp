@@ -1,4 +1,4 @@
-#include "Chip8.hpp"
+#include "headers/Chip8.hpp"
 #include <cstdint>
 #include <fstream>
 #include <cstring>

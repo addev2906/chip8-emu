@@ -3,8 +3,8 @@
 #include <iomanip>
 #include <iostream>
 
-#include "Chip8.hpp"
-#include "Platform.hpp"
+#include "headers/Chip8.hpp"
+#include "headers/Platform.hpp"
 
 void saveProgram(Chip8& chip8, int start, int count){
     std::ofstream output("program.txt");
