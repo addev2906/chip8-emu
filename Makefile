@@ -8,5 +8,9 @@ TARGET = chip8
 $(TARGET): $(SRCS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRCS) $(SDL_FLAGS)
 
+debug: CXXFLAGS += -g -fsanitize=address
+debug: clean chip8
+
+
 clean:
 	rm -f $(TARGET)

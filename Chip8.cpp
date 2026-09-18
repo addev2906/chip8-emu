@@ -278,7 +278,13 @@ void Chip8::OP_Dxyn(){
         uint8_t spriteByte = memory[index+row];
         for(int col=0;col<8;col++){
             uint8_t spritePixel = spriteByte & (0x80 >> col);
-            uint32_t* screenPixel = &video[(ypos+row)*VIDEO_WIDTH+(xpos+col)];
+            unsigned int screenX = xpos + col;
+            unsigned int screenY = ypos + row;
+
+            if (screenX >= VIDEO_WIDTH || screenY >= VIDEO_HEIGHT)
+                continue;   // pixel would fall off-screen — skip it
+
+            uint32_t* screenPixel = &video[screenY * VIDEO_WIDTH + screenX];
 
             if(spritePixel){
                 if(*screenPixel==0xFFFFFFFF){

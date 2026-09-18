@@ -2,3 +2,6 @@ output.txt
 print_1.ch8
 minimal.ch8
 chip8
+pong.rom
+tetris.ch8
+test_opcode.ch8
