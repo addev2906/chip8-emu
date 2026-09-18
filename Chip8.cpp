@@ -1,6 +1,7 @@
 #include "Chip8.hpp"
-#include <cstdio>
+#include <cstdint>
 #include <fstream>
+#include <cstring>
 
 const unsigned int START_ADDRESS = 0x200;
 const unsigned int FONTSET_SIZE = 80;
@@ -50,4 +51,43 @@ void Chip8::LoadROM(char const* filename){
 
 		delete[] buffer;
 	}
+}
+
+void Chip8::OP_00E0(){
+    std::memset(video,0,sizeof(video));
+}
+
+void Chip8::OP_Annn(){
+    uint16_t address = opcode & 0x0FFF;
+    index = address;
+}
+void Chip8::OP_Dxyn(){
+    uint8_t Vx =  (opcode & 0x0F00) >> 8u;
+    uint8_t Vy =  (opcode & 0x00F0) >> 8u;
+    uint8_t height = opcode & 0x000F;
+
+    uint8_t xpos = registers[Vx]%VIDEO_WIDTH;
+    uint8_t ypos = registers[Vy]%VIDEO_HEIGHT;
+
+    registers[0xF] = 0;
+
+    for(uint8_t row=0;row<height;row++){
+        uint8_t spriteByte = memory[index+row];
+        for(int col=0;col<8;col++){
+            uint8_t spritePixel = spriteByte & (0x0800 >> col);
+            uint32_t* screenPixel = &video[(ypos+row)*VIDEO_WIDTH+(xpos+col)];
+
+            if(spritePixel){
+                if(*screenPixel==0xFFFFFFFF){
+                    registers[0xF] = 1;
+                }
+                *screenPixel ^= 0xFFFFFFFF;
+            }
+        }
+    }
+}
+
+void Chip8::OP_1nnn(){
+    uint16_t address = (opcode & 0x0FFFu);
+    pc=address;
 }
