@@ -461,3 +461,17 @@ void Chip8::OP_Fx65()
 }
 
 void Chip8::OP_NULL(){}
+
+void Chip8::Cycle(){
+    opcode = (memory[pc]<<8u | memory[pc+1]);
+    pc+=2;
+
+    ((*this).*(table[(opcode & 0xF000)>>12u]))();
+
+    if(delayTimer>0){
+        delayTimer--;
+    }
+    if(soundTimer>0){
+        soundTimer--;
+    }
+}
