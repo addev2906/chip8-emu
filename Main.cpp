@@ -40,19 +40,30 @@ int main(int argc, char** argv)
 	int videoPitch = sizeof(chip8.video[0]) * VIDEO_WIDTH;
 
 	auto lastCycleTime = std::chrono::high_resolution_clock::now();
+	auto lastTimerTime = std::chrono::high_resolution_clock::now();
 	bool quit = false;
+
 	while (!quit)
 	{
 		quit = platform.ProcessInput(chip8.keypad);
 		platform.ProcessAudio(chip8.soundTimer);
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		float dt = std::chrono::duration<float, std::chrono::milliseconds::period>(currentTime - lastCycleTime).count();
 
+		auto currentTime = std::chrono::high_resolution_clock::now();
+
+		float dt = std::chrono::duration<float, std::chrono::milliseconds::period>(currentTime - lastCycleTime).count();
 		if (dt > cycleDelay)
 		{
 			lastCycleTime = currentTime;
 			chip8.Cycle();
 			platform.Update(chip8.video, videoPitch);
+		}
+
+		float timerDt = std::chrono::duration<float, std::chrono::milliseconds::period>(currentTime - lastTimerTime).count();
+		if (timerDt > 1000.0f / 60.0f)   // ~16.67ms, true 60Hz
+		{
+			lastTimerTime = currentTime;
+			if (chip8.delayTimer > 0) chip8.delayTimer--;
+			if (chip8.soundTimer > 0) chip8.soundTimer--;
 		}
 	}
 

@@ -474,10 +474,10 @@ void Chip8::Cycle(){
 
     ((*this).*(table[(opcode & 0xF000)>>12u]))();
 
-    if(delayTimer>0){
-        delayTimer--;
-    }
-    if(soundTimer>0){
-        soundTimer--;
-    }
+    // if(delayTimer>0){
+    //     delayTimer--;
+    // }
+    // if(soundTimer>0){
+    //     soundTimer--;
+    // }
 }
