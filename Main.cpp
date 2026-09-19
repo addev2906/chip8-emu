@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <string>
 
 #include "headers/Chip8.hpp"
 #include "headers/Platform.hpp"
@@ -21,9 +22,9 @@ void saveProgram(Chip8& chip8, int start, int count){
 }
 int main(int argc, char** argv)
 {
-	if (argc != 4)
+	if (argc < 4 || argc>5)
 	{
-		std::cerr << "Usage: " << argv[0] << " <Scale> <Delay> <ROM>\n";
+		std::cerr << "Usage: " << argv[0] << " <Scale> <Delay> <ROM> (OPTIONAL)--code\n";
 		return 1;
 	}
 
@@ -35,7 +36,10 @@ int main(int argc, char** argv)
 
 	Chip8 chip8;
 	chip8.LoadROM(romFilename);
-	saveProgram(chip8, 0x200,3583);
+	if(argc==5){
+	    std::string genFlag = argv[4];
+		if(genFlag=="--code") saveProgram(chip8, 0x200,3583);
+	}
 
 	int videoPitch = sizeof(chip8.video[0]) * VIDEO_WIDTH;
 
